@@ -28,7 +28,7 @@ RUN  apt-get update \
   && pip install --upgrade pip wheel
 
 # Install dependencies
-COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt /freqtrade/
+COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt requirements-plot.txt requirements-freqai.txt requirements-freqai-rl.txt docs/requirements-docs.txt /freqtrade/
 USER ftuser
 RUN  pip install --user --no-cache-dir "numpy<3.0" \
   && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
