@@ -31,7 +31,7 @@ RUN  apt-get update \
 COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt /freqtrade/
 USER ftuser
 RUN  pip install --user --no-cache-dir "numpy<3.0" \
-  && pip install --user --no-cache-dir -r requirements-hyperopt.txt
+  && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
   && pip install --user --no-cache-dir -r requirements-dev.txt
 
 # Copy dependencies to runtime-image
