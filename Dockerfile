@@ -33,9 +33,11 @@ COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requiremen
 COPY --chown=ftuser:ftuser docs/requirements-docs.txt /freqtrade/docs/
 
 USER ftuser
-RUN  pip install --user --no-cache-dir "numpy<3.0" \
+RUN /bin/bash -c "source activate py3 \
+  && pip install --user --no-cache-dir 'numpy<3.0' \
   && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
-  && pip install --user --no-cache-dir -r requirements-dev.txt
+  && pip install --user --no-cache-dir -r requirements-dev.txt \
+  && source deactivate"
 
 # Copy dependencies to runtime-image
 FROM base AS runtime-image
@@ -48,10 +50,11 @@ USER ftuser
 # Install and execute
 COPY --chown=ftuser:ftuser . /freqtrade/
 
-RUN pip install -e . --user --no-cache-dir \
+RUN /bin/bash -c "source activate py3 && pip install -e . --user --no-cache-dir \
   && mkdir /freqtrade/user_data/ \
-  && freqtrade install-ui
+  && freqtrade install-ui && source deactivate"
 
-ENTRYPOINT ["freqtrade"]
-# Default to trade mode
-CMD [ "trade" ]
+RUN 
+
+ENTRYPOINT [ "/tini", "--" ]
+CMD /bin/bash -c "source activate py3 && freqtrade trade && source deactivate"
