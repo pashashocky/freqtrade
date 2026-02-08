@@ -37,6 +37,10 @@ RUN  pip install --user --no-cache-dir "numpy<3.0" \
   && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
   && pip install --user --no-cache-dir -r requirements-dev.txt
 
+RUN git clone --recursive https://github.com/Microsoft/LightGBM \
+  && cd LightGBM \
+  && sh ./build-python.sh install --cuda
+
 # Copy dependencies to runtime-image
 FROM base AS runtime-image
 COPY --from=python-deps /usr/local/lib /usr/local/lib
