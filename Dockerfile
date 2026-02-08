@@ -28,6 +28,11 @@ RUN  apt-get update \
   && apt-get clean \
   && pip install --upgrade pip wheel
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  ocl-icd-libopencl1 \
+  nvidia-opencl-icd \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies
 COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt requirements-plot.txt requirements-freqai.txt requirements-freqai-rl.txt /freqtrade/
 COPY --chown=ftuser:ftuser docs/requirements-docs.txt /freqtrade/docs/
