@@ -10,6 +10,7 @@ ENV FT_APP_ENV="docker"
 
 # Prepare environment
 RUN mkdir /freqtrade \
+  && mkdir /freqtrade/docs \
   && apt-get update \
   && apt-get -y install sudo libatlas3-base curl sqlite3 libgomp1 \
   && apt-get clean \
@@ -28,7 +29,9 @@ RUN  apt-get update \
   && pip install --upgrade pip wheel
 
 # Install dependencies
-COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt requirements-plot.txt requirements-freqai.txt requirements-freqai-rl.txt docs/requirements-docs.txt /freqtrade/
+COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt requirements-plot.txt requirements-freqai.txt requirements-freqai-rl.txt /freqtrade/
+COPY --chown=ftuser:ftuser docs/requirements-docs.txt /freqtrade/docs/
+
 USER ftuser
 RUN  pip install --user --no-cache-dir "numpy<3.0" \
   && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
