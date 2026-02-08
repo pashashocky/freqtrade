@@ -54,5 +54,5 @@ RUN /bin/bash -c "source activate py3 && pip install -e . --user --no-cache-dir 
   && mkdir /freqtrade/user_data/ \
   && freqtrade install-ui && source deactivate"
 
-ENTRYPOINT [ "/tini", "--" ]
-CMD /bin/bash -c "source activate py3 && freqtrade trade && source deactivate"
+ENTRYPOINT ["/tini", "--", "/bin/bash", "-c", "source activate py3 && exec \"$@\"", "--"]
+CMD ["freqtrade", "trade"]
