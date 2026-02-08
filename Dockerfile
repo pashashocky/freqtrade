@@ -28,9 +28,7 @@ RUN  apt-get update \
   && apt-get clean \
   && pip install --upgrade pip wheel
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  ocl-icd-libopencl1 \
-  nvidia-opencl-icd \
+RUN apt-get install -y ocl-icd-libopencl1 nvidia-opencl-icd \
   && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
