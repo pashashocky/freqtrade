@@ -35,7 +35,7 @@ COPY --chown=ftuser:ftuser docs/requirements-docs.txt /freqtrade/docs/
 USER ftuser
 RUN  pip install --user --no-cache-dir "numpy<3.0" \
   && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
-  && pip install lightgbm --config-settings=cmake.define.USE_GPU=ON \
+  && pip install --user --no-cache-dir lightgbm --config-settings=cmake.define.USE_GPU=ON \
   && pip install --user --no-cache-dir -r requirements-dev.txt
 
 # Copy dependencies to runtime-image
