@@ -28,9 +28,6 @@ RUN  apt-get update \
   && apt-get clean \
   && pip install --upgrade pip wheel
 
-RUN apt-get install -y ocl-icd-libopencl1 nvidia-opencl-icd \
-  && rm -rf /var/lib/apt/lists/*
-
 # Install dependencies
 COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt requirements-plot.txt requirements-freqai.txt requirements-freqai-rl.txt /freqtrade/
 COPY --chown=ftuser:ftuser docs/requirements-docs.txt /freqtrade/docs/
@@ -38,6 +35,7 @@ COPY --chown=ftuser:ftuser docs/requirements-docs.txt /freqtrade/docs/
 USER ftuser
 RUN  pip install --user --no-cache-dir "numpy<3.0" \
   && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
+  && pip install lightgbm --config-settings=cmake.define.USE_GPU=ON \
   && pip install --user --no-cache-dir -r requirements-dev.txt
 
 # Copy dependencies to runtime-image
