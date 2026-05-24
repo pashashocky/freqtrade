@@ -1,4 +1,78 @@
-FROM nvidia-cuda AS base
+# FROM nvidia-cuda AS base
+# 
+# # Setup env
+# ENV LANG=C.UTF-8
+# ENV LC_ALL=C.UTF-8
+# ENV PYTHONDONTWRITEBYTECODE=1
+# ENV PYTHONFAULTHANDLER=1
+# ENV PATH=/home/ftuser/.local/bin:$PATH
+# ENV FT_APP_ENV="docker"
+# 
+# # Prepare environment
+# RUN mkdir /freqtrade \
+#   && mkdir /freqtrade/docs \
+#   && apt-get update \
+#   && apt-get -y install sudo libatlas3-base curl sqlite3 libgomp1 \
+#   && apt-get clean \
+#   && useradd -u 1000 -G sudo -U -m -s /bin/bash ftuser \
+#   && chown ftuser:ftuser /freqtrade \
+#   # Allow sudoers
+#   && echo "ftuser ALL=(ALL) NOPASSWD: /bin/chown" >> /etc/sudoers
+# 
+# WORKDIR /freqtrade
+# 
+# # Install dependencies
+# FROM base AS python-deps
+# RUN  apt-get update \
+#   && apt-get -y install build-essential libssl-dev git libffi-dev libgfortran5 pkg-config cmake gcc pocl-opencl-icd \
+#   && apt-get clean \
+#   && pip install --upgrade pip wheel
+# 
+# # Install dependencies
+# COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt requirements-plot.txt requirements-freqai.txt requirements-freqai-rl.txt /freqtrade/
+# COPY --chown=ftuser:ftuser docs/requirements-docs.txt /freqtrade/docs/
+# 
+# USER ftuser
+# RUN /bin/bash -c "source activate py3 \
+#   && pip install --user --no-cache-dir 'numpy<3.0' \
+#   && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
+#   && pip install --user --no-cache-dir -r requirements-dev.txt \
+#   && source deactivate"
+# 
+# # Copy dependencies to runtime-image
+# FROM base AS runtime-image
+# COPY --from=python-deps /usr/local/lib /usr/local/lib
+# ENV LD_LIBRARY_PATH=/usr/local/lib
+# 
+# COPY --from=python-deps --chown=ftuser:ftuser /home/ftuser/.local /home/ftuser/.local
+# 
+# USER ftuser
+# # Install and execute
+# COPY --chown=ftuser:ftuser . /freqtrade/
+# 
+# RUN /bin/bash -c "source activate py3 && pip install -e . --user --no-cache-dir \
+#   && mkdir /freqtrade/user_data/ \
+#   && freqtrade install-ui && source deactivate"
+# 
+# ENTRYPOINT ["/tini", "--", "/bin/bash", "-c", "source activate py3 && exec \"$@\"", "--"]
+# CMD ["freqtrade", "trade"]
+
+
+# FROM freqtrade:latest
+
+# Switch user to root if you must install something from apt
+# Don't forget to switch the user back below!
+# USER root
+
+# The below dependency - pyti - serves as an example. Please use whatever you need!
+# RUN /bin/bash -c "source activate py3 \
+#   && pip install --user --no-cache-dir 'psycopg[binary]' \
+#   && source deactivate"
+
+# Switch back to user (only if you required root above)
+# USER ftuser
+
+FROM python:3.14.5-slim-trixie AS base
 
 # Setup env
 ENV LANG=C.UTF-8
@@ -10,7 +84,6 @@ ENV FT_APP_ENV="docker"
 
 # Prepare environment
 RUN mkdir /freqtrade \
-  && mkdir /freqtrade/docs \
   && apt-get update \
   && apt-get -y install sudo libatlas3-base curl sqlite3 libgomp1 \
   && apt-get clean \
@@ -24,20 +97,16 @@ WORKDIR /freqtrade
 # Install dependencies
 FROM base AS python-deps
 RUN  apt-get update \
-  && apt-get -y install build-essential libssl-dev git libffi-dev libgfortran5 pkg-config cmake gcc pocl-opencl-icd \
+  && apt-get -y install build-essential libssl-dev git libffi-dev libgfortran5 pkg-config cmake gcc \
   && apt-get clean \
   && pip install --upgrade pip wheel
 
 # Install dependencies
-COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt requirements-dev.txt requirements-plot.txt requirements-freqai.txt requirements-freqai-rl.txt /freqtrade/
-COPY --chown=ftuser:ftuser docs/requirements-docs.txt /freqtrade/docs/
-
+COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt /freqtrade/
 USER ftuser
-RUN /bin/bash -c "source activate py3 \
-  && pip install --user --no-cache-dir 'numpy<3.0' \
-  && pip install --user --no-cache-dir -r requirements-hyperopt.txt \
-  && pip install --user --no-cache-dir -r requirements-dev.txt \
-  && source deactivate"
+RUN  pip install --user --no-cache-dir "numpy<3.0" \
+  && pip install --user --no-cache-dir "psycopg[binary]" \
+  && pip install --user --no-cache-dir -r requirements-hyperopt.txt
 
 # Copy dependencies to runtime-image
 FROM base AS runtime-image
@@ -50,9 +119,10 @@ USER ftuser
 # Install and execute
 COPY --chown=ftuser:ftuser . /freqtrade/
 
-RUN /bin/bash -c "source activate py3 && pip install -e . --user --no-cache-dir \
+RUN pip install -e . --user --no-cache-dir \
   && mkdir /freqtrade/user_data/ \
-  && freqtrade install-ui && source deactivate"
+  && freqtrade install-ui
 
-ENTRYPOINT ["/tini", "--", "/bin/bash", "-c", "source activate py3 && exec \"$@\"", "--"]
-CMD ["freqtrade", "trade"]
+ENTRYPOINT ["freqtrade"]
+# Default to trade mode
+CMD [ "trade" ]
