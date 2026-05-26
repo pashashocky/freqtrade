@@ -1,4 +1,4 @@
-FROM python:3.14.3-slim-trixie AS base
+FROM python:3.13.11-slim-bookworm AS base
 
 # Setup env
 ENV LANG=C.UTF-8
@@ -31,6 +31,7 @@ RUN  apt-get update \
 COPY --chown=ftuser:ftuser requirements.txt requirements-hyperopt.txt /freqtrade/
 USER ftuser
 RUN  pip install --user --no-cache-dir "numpy<3.0" \
+  && pip install --user --no-cache-dir "psycopg[binary]" \
   && pip install --user --no-cache-dir -r requirements-hyperopt.txt
 
 # Copy dependencies to runtime-image
@@ -47,6 +48,8 @@ COPY --chown=ftuser:ftuser . /freqtrade/
 RUN pip install -e . --user --no-cache-dir \
   && mkdir /freqtrade/user_data/ \
   && freqtrade install-ui
+
+RUN pip install --user --no-cache-dir "psycopg[binary]"
 
 ENTRYPOINT ["freqtrade"]
 # Default to trade mode
